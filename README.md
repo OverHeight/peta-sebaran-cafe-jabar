@@ -1,19 +1,77 @@
-# 🎈 Blank app template
+# ☕ Dashboard Sebaran Café Jawa Barat
 
-A simple Streamlit app template for you to modify!
+Dashboard ini merupakan aplikasi berbasis **Streamlit** untuk memvisualisasikan sebaran lokasi café di wilayah **Jawa Barat** menggunakan peta interaktif dan grafik statistik.  
+Data lokasi café ditampilkan berdasarkan koordinat geografis (latitude & longitude) yang telah melalui proses **reverse geocoding**.
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://blank-app-template.streamlit.app/)
+---
 
-### How to run it on your own machine
+## 🎯 Tujuan Proyek
 
-1. Install the requirements
+Proyek ini bertujuan untuk:
+- Menampilkan sebaran lokasi café secara visual dalam bentuk peta
+- Mengelompokkan jumlah lokasi café berdasarkan **wilayah**
+- Menyediakan ringkasan statistik yang mudah dipahami
+- Membersihkan data dengan menghilangkan lokasi tanpa alamat yang valid
 
-   ```
-   $ pip install -r requirements.txt
-   ```
+---
 
-2. Run the app
+## 🧩 Fitur Utama
 
-   ```
-   $ streamlit run streamlit_app.py
-   ```
+- 📍 **Peta Interaktif**
+  - Menggunakan **Folium**
+  - Marker menampilkan nama café dan alamat
+- 📊 **Grafik Batang**
+  - Menampilkan jumlah lokasi café per wilayah
+  - Toggle untuk menampilkan **Top 10 wilayah**
+- 📋 **Tabel Data**
+  - Menampilkan dataset café yang telah difilter
+- 📁 **Upload CSV**
+  - Pengguna dapat mengunggah dataset sendiri
+
+---
+
+## 🗂 Struktur Data CSV
+
+Dataset yang digunakan harus memiliki kolom berikut:
+
+| Nama Kolom     | Keterangan                          |
+|---------------|-------------------------------------|
+| `nama`        | Nama café                           |
+| `lat`         | Latitude lokasi                     |
+| `lon`         | Longitude lokasi                    |
+| `wilayah`     | Wilayah / kota                      |
+| `alamat_asli` | Alamat hasil reverse geocoding      |
+
+---
+
+## 🔄 Alur Pengolahan Data
+
+1. Dataset café dibaca dari file CSV
+2. Proses **reverse geocoding** dilakukan menggunakan:
+   - OpenStreetMap Nominatim
+   - Library `geopy`
+3. Data yang **tidak memiliki alamat valid** dihapus
+4. Data bersih digunakan untuk:
+   - Visualisasi peta
+   - Grafik jumlah lokasi per wilayah
+   - Tabel dataset
+
+---
+
+## 🛠 Teknologi yang Digunakan
+
+- **Python**
+- **Streamlit** – antarmuka aplikasi
+- **Pandas** – pengolahan data
+- **Folium** – peta interaktif
+- **Altair** – visualisasi grafik
+- **Geopy (Nominatim)** – reverse geocoding
+- **OpenStreetMap** – sumber data alamat
+
+---
+
+## ▶️ Cara Menjalankan Aplikasi
+
+1. Install dependensi:
+   ```bash
+   pip install streamlit pandas folium geopy altair streamlit-folium
