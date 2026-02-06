@@ -74,3 +74,6 @@ Dataset yang digunakan harus memiliki kolom berikut:
 1. Install dependensi:
    ```bash
    pip install streamlit pandas folium geopy altair streamlit-folium
+  Atau
+  ```bash
+   pip install requirements.txt
