@@ -20,9 +20,8 @@ Proyek ini bertujuan untuk:
 - 📍 **Peta Interaktif**
   - Menggunakan **Folium**
   - Marker menampilkan nama café dan alamat
-- 📊 **Grafik Batang**
+- 📊 **Grafik Bar**
   - Menampilkan jumlah lokasi café per wilayah
-  - Toggle untuk menampilkan **Top 10 wilayah**
 - 📋 **Tabel Data**
   - Menampilkan dataset café yang telah difilter
 - 📁 **Upload CSV**
