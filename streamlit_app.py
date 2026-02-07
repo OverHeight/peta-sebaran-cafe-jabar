@@ -4,7 +4,6 @@ import folium
 import altair as alt
 from streamlit_folium import st_folium
 
-
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="Peta Café Jabar", layout="wide")
 
@@ -18,85 +17,83 @@ with st.sidebar:
 if uploaded_file:
     df = pd.read_csv(uploaded_file)
 else:
-    # Data dummy atau default
-    df = pd.read_csv("./data/spatial/coffee_shop_jawa_barat_with_address.csv")
+    # Menggunakan data dummy jika file belum diupload
+    # Pastikan file csv memiliki kolom: nama, wilayah, lat, lon, dan sumber (opsional)
+    try:
+        df = pd.read_csv("./data/spatial/coffee_shop_jawa_barat_with_address.csv")
+    except:
+        # Data fallback jika file tidak ditemukan sama sekali
+        data = {
+            'nama': ['Starbucks', 'SPBU Dago', 'Tanpa Nama', 'Warung Makan'],
+            'wilayah': ['Kota Bandung', 'Kota Bandung', 'Kabupaten Bandung', 'Sumedang'],
+            'lat': [-6.894, -6.869, -6.8644, -6.892],
+            'lon': [107.6055, 107.6209, 107.6279, 107.7641],
+            'sumber': ['Google Maps', 'Google Maps', 'Manual', 'Survey']
+        }
+        df = pd.DataFrame(data)
+
+# Pastikan kolom sumber ada untuk kebutuhan grafik
+if 'sumber' not in df.columns:
+    df['sumber'] = 'Data Internal'
 
 # --- TAMPILAN UTAMA ---
 st.title("☕ Dashboard Sebaran Café")
 
-col_map, col_info = st.columns([3, 1])
+col_map, col_info = st.columns([2.5, 1])
 
 with col_map:
     # Inisialisasi Map
-    m = folium.Map(location=[df['lat'].mean(), df['lon'].mean()], zoom_start=9)
+    m = folium.Map(location=[df['lat'].mean(), df['lon'].mean()], zoom_start=11)
     
     # Tambah Marker
     for _, row in df.iterrows():
         folium.Marker(
             [row['lat'], row['lon']], 
-            popup = f"Nama   : {row['nama']}\nAlamat : {row['wilayah']}",
+            popup = f"Nama: {row['nama']}\nWilayah: {row['wilayah']}",
             icon=folium.Icon(color='orange', icon='coffee', prefix='fa')
         ).add_to(m)
     
-    st_folium(m, width='100%', height='600')
+    st_folium(m, width='100%', height=550)
 
-    with col_info:
-        st.subheader("Detail Data")
-        st.write(f"Jumlah Titik: {len(df)}")
+with col_info:
+    st.subheader("📊 Detail Data pie chart wilayah")
+    st.metric("Total Titik", len(df))
+    
+    # --- TABS UNTUK PIE CHART ---
+    tab_wilayah, tab_sumber = st.tabs(["📍 Wilayah", "ℹ️ Sumber"])
 
-        # === TOGGLE BAR CHART ===
-        show_top = st.toggle("Diagram Persentase Café Berdasarkan wilayah", value=True)
+    with tab_wilayah:
+        # Hitung data wilayah
+        wilayah_counts = df['wilayah'].value_counts().reset_index()
+        wilayah_counts.columns = ['Kategori', 'Jumlah']
 
-        location_count = (
-            df['wilayah']
-            .value_counts()
-            .reset_index()
-        )
-        location_count.columns = ['Wilayah', 'Jumlah']
-
-
-        if show_top:
-            location_count = location_count.head(10)
-            chart_title = "Wilayah Berdasarkan Jumlah Lokasi Café"
-        else:
-            chart_title = "Jumlah Lokasi Café per Wilayah"
-
-        chart = (
-            alt.Chart(location_count)
-            .mark_bar(
-                cornerRadiusTopLeft=6,
-                cornerRadiusTopRight=6
-            )
-            .encode(
-                x=alt.X(
-                    'Nama Cafe:N',
-                    sort='-y',
-                    title=None
-                ),
-                y=alt.Y(
-                    'Jumlah:Q',
-                    title='Jumlah Lokasi'
-                ),
-                tooltip=[
-                    alt.Tooltip('Nama Cafe:N', title='Café'),
-                    alt.Tooltip('Jumlah:Q', title='Jumlah')
-                ],
-                color=alt.value('#f97316')
-            )
-            .properties(
-                height=300,
-                title=chart_title
-            )
-        )
-
-        st.altair_chart(chart, use_container_width=True,
-                        height=350)
+        chart_wilayah = alt.Chart(wilayah_counts).mark_arc(innerRadius=50).encode(
+            theta=alt.Theta(field="Jumlah", type="quantitative"),
+            color=alt.Color(field="Kategori", type="nominal", legend=alt.Legend(orient="bottom", title=None)),
+            tooltip=['Kategori', 'Jumlah']
+        ).properties(height=350)
         
-    # === TABEL DATA ===
+        st.altair_chart(chart_wilayah, use_container_width=True)
+
+    with tab_sumber:
+        # Hitung data sumber
+        sumber_counts = df['sumber'].value_counts().reset_index()
+        sumber_counts.columns = ['Kategori', 'Jumlah']
+
+        chart_sumber = alt.Chart(sumber_counts).mark_arc(innerRadius=50).encode(
+            theta=alt.Theta(field="Jumlah", type="quantitative"),
+            color=alt.Color(field="Kategori", type="nominal", scale=alt.Scale(scheme='set2'), legend=alt.Legend(orient="bottom", title=None)),
+            tooltip=['Kategori', 'Jumlah']
+        ).properties(height=350)
+        
+        st.altair_chart(chart_sumber, use_container_width=True)
+
+# === TABEL DATA (Update: alamat_asli diganti wilayah) ===
 st.subheader("📋 Dataset Lokasi Café")  
 
+# Menampilkan kolom wilayah menggantikan alamat_asli
 st.dataframe(
-    df[['nama', 'alamat_asli', 'lat', 'lon']],
+    df[['nama', 'wilayah', 'lat', 'lon']],
     use_container_width=True,
     height=350
 )
